@@ -1,10 +1,14 @@
-import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import { getFeaturedEvents } from '../dummy-data';
+import EventList from '../components/events/event-list';
 
-export default function Home() {
+const HomePage = () => {
+  const featuredEvents = getFeaturedEvents();
+
   return (
     <div>
-      <h1>Hello world</h1>
+      <EventList items={featuredEvents} />
     </div>
   );
-}
+};
+
+export default HomePage;
