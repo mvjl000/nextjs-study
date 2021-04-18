@@ -1,17 +1,35 @@
-import { useRouter } from 'next/router';
-import { getEventById } from '../../dummy-data';
+import { getAllEvents, getEventById } from '../../helpers/api-util';
 import EventSummary from '../../components/event-detail/event-summary';
 import EventLogistics from '../../components/event-detail/event-logistics';
 import EventContent from '../../components/event-detail/event-content';
 import ErrorAlert from '../../components/ui/error-alert';
 import Button from '../../components/ui/button';
 
-const EventDetailPage = () => {
-  const router = useRouter();
+export const getStaticPaths = async () => {
+  const events = await getAllEvents();
 
-  const { eventId } = router.query;
+  const paths = events.map((event) => ({ params: { eventId: event.id } }));
 
-  const event = getEventById(eventId);
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps = async (context) => {
+  const { eventId } = context.params;
+
+  const event = await getEventById(eventId);
+
+  return {
+    props: {
+      event,
+    },
+  };
+};
+
+const EventDetailPage = (props) => {
+  const { event } = props;
 
   if (!event) {
     return (
