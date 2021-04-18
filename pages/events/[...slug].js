@@ -3,16 +3,12 @@ import EventList from '../../components/events/event-list';
 import ResultsTitle from '../../components/events/results-title';
 import Button from '../../components/ui/button';
 import ErrorAlert from '../../components/ui/error-alert';
-import { getFilteredEvents } from '../../dummy-data';
+import { getFilteredEvents } from '../../helpers/api-util';
 
-const FilteredEventsPage = () => {
-  const router = useRouter();
+export const getServerSideProps = async (context) => {
+  const { params } = context;
 
-  const filterData = router.query.slug;
-
-  if (!filterData) {
-    return <p className="center">Loading...</p>;
-  }
+  const filterData = params.slug;
 
   const filteredYear = filterData[0];
   const filteredMonth = filterData[1];
@@ -28,6 +24,44 @@ const FilteredEventsPage = () => {
     numMonth < 1 ||
     numMonth > 12
   ) {
+    return {
+      props: { hasError: true },
+      // notFound: true,
+    };
+  }
+
+  const filteredEvents = await getFilteredEvents({
+    year: numYear,
+    month: numMonth,
+  });
+
+  return {
+    props: {
+      events: filteredEvents,
+      date: {
+        year: numYear,
+        month: numMonth,
+      },
+    },
+  };
+};
+
+const FilteredEventsPage = (props) => {
+  const router = useRouter();
+
+  // const filterData = router.query.slug;
+
+  // if (!filterData) {
+  //   return <p className="center">Loading...</p>;
+  // }
+
+  // const filteredYear = filterData[0];
+  // const filteredMonth = filterData[1];
+
+  // const numYear = +filteredYear;
+  // const numMonth = +filteredMonth;
+
+  if (props.hasError) {
     return (
       <>
         <ErrorAlert>
@@ -40,7 +74,8 @@ const FilteredEventsPage = () => {
     );
   }
 
-  const filteredEvents = getFilteredEvents({ year: numYear, month: numMonth });
+  const filteredEvents = props.events;
+  const { month, year } = props.date;
 
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
@@ -55,7 +90,7 @@ const FilteredEventsPage = () => {
     );
   }
 
-  const date = new Date(numYear, numMonth - 1);
+  const date = new Date(year, month - 1);
 
   return (
     <>
