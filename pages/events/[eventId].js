@@ -1,4 +1,4 @@
-import { getAllEvents, getEventById } from '../../helpers/api-util';
+import { getEventById, getFeaturedEvents } from '../../helpers/api-util';
 import EventSummary from '../../components/event-detail/event-summary';
 import EventLogistics from '../../components/event-detail/event-logistics';
 import EventContent from '../../components/event-detail/event-content';
@@ -6,13 +6,13 @@ import ErrorAlert from '../../components/ui/error-alert';
 import Button from '../../components/ui/button';
 
 export const getStaticPaths = async () => {
-  const events = await getAllEvents();
+  const events = await getFeaturedEvents();
 
   const paths = events.map((event) => ({ params: { eventId: event.id } }));
 
   return {
     paths,
-    fallback: false,
+    fallback: true,
   };
 };
 
@@ -25,6 +25,7 @@ export const getStaticProps = async (context) => {
     props: {
       event,
     },
+    revalidate: 30,
   };
 };
 
@@ -34,9 +35,9 @@ const EventDetailPage = (props) => {
   if (!event) {
     return (
       <>
-        <ErrorAlert>
-          <p className="center">No event found</p>
-        </ErrorAlert>
+        <div className="center">
+          <p className="center">Loading...</p>
+        </div>
         <div className="center">
           <Button link="/events">Go Back</Button>
         </div>
